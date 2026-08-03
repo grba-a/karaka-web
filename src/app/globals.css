@@ -1,26 +1,241 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------ *
+ *  KARAKA — „Port of Call"
+ *  Vizualni luk: vapnenac (09:00) → pijesak → cigla → noć (02:00).
+ *  --bg / --fg animira jedan globalni ScrollTrigger (DayNight.tsx);
+ *  sve sekcije su prozirne i sjede na tom jednom prijelazu.
+ * ------------------------------------------------------------------ */
+
+@theme {
+  --color-limestone: #ede6d8;
+  --color-sand: #d9cdb8;
+  --color-brick: #9c4a2f;
+  --color-brick-deep: #5d2a1c;
+  --color-night: #14100d;
+  --color-bottle: #1e3a2b;
+  --color-sign: #2f8f55;
+  --color-brass: #b08a4a;
+  --color-brass-lit: #d9b478;
+  --color-ink: #171412;
+
+  --font-display: var(--font-fraunces);
+  --font-body: var(--font-archivo);
+  --font-mono: var(--font-dm-mono);
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* žive vrijednosti — GSAP ih mijenja po scrollu */
+  --bg: #ede6d8;
+  --fg: #171412;
+  --rule: 23 20 18;
+  --accent: #9c4a2f;
+
+  --shell: clamp(1.25rem, 5vw, 5.5rem);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  min-width: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background-color: var(--bg);
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: auto;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-synthesis-weight: none;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--color-brass);
+  color: #14100d;
+}
+
+/* Papirnata zrnatost preko cijele stranice — „starinski" bez kiča.
+   Fiksna, pa ne košta ništa na scrollu.
+
+   Bez mix-blend-modea: overlay/soft-light preko fiksnog <header>a koji ima
+   vlastiti kompozitni sloj ostavlja vidljiv pravokutni šav u gornjem lijevom
+   kutu. Obična niska prozirnost radi jednako dobro i na vapnencu i na noći. */
+.grain-layer {
+  position: fixed;
+  inset: -60px;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.055;
+}
+
+/* ---------- tipografija ---------- */
+
+.display {
+  font-family: var(--font-display), Georgia, serif;
+  font-variation-settings: "SOFT" 40, "WONK" 1, "opsz" 144;
+  font-weight: 500;
+  line-height: 0.85;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.display-sub {
+  font-family: var(--font-display), Georgia, serif;
+  font-variation-settings: "SOFT" 24, "WONK" 1, "opsz" 40;
+  font-weight: 400;
+  line-height: 1.06;
+  letter-spacing: -0.018em;
+  text-wrap: pretty;
+}
+
+.label {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  line-height: 1;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+
+.mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.prose-lead {
+  font-size: clamp(1.0625rem, 1.5vw, 1.3125rem);
+  line-height: 1.62;
+  letter-spacing: -0.005em;
+  text-wrap: pretty;
+}
+
+/* ---------- reveal primitives ---------- *
+ * Elementi kreću skriveni preko CSS-a, GSAP ih otkriva. Ako JS ne
+ * proradi ili je reduced-motion, <html class="is-static"> ih vrati. */
+
+.reveal-line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+
+/* Početna stanja: samo protiv bljeska prije hidracije. Čim GSAP preuzme,
+   prepReveal() ih prepiše svojim vrijednostima (vidi lib/gsap.ts). */
+.reveal-line > span {
+  display: block;
+  transform: translate3d(0, 105%, 0);
+  will-change: transform;
+}
+
+.reveal-mask {
+  clip-path: inset(0% 0% 100% 0%);
+  will-change: clip-path;
+}
+
+[data-fade] {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+.is-static .reveal-line > span,
+.is-static [data-fade] {
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+.is-static .reveal-mask {
+  clip-path: inset(0 0 0 0) !important;
+}
+
+/* ---------- ledger / cigla ---------- */
+
+.rule-t {
+  border-top: 1px solid rgb(var(--rule) / 0.18);
+}
+
+.rule-b {
+  border-bottom: 1px solid rgb(var(--rule) / 0.18);
+}
+
+/* Ciglasti vez kao razdjelnik između sekcija.
+   Dva reda cigle u pomaku od pola cigle (running bond) — bez ijedne slike.
+   Cigle su namjerno velike i rijetke: sitniji raster odmah počne izgledati
+   kao karirani papir, a ne kao zid. */
+.brick-band {
+  --b-w: 132px;
+  --b-h: 30px;
+  --b-gap: 5px;
+  position: relative;
+  height: calc(var(--b-h) * 2 + var(--b-gap));
+  overflow: hidden;
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 14%,
+    #000 86%,
+    transparent
+  );
+}
+
+.brick-band::before,
+.brick-band::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--b-h);
+  border-block: 1px solid rgb(var(--rule) / 0.26);
+  background-image: repeating-linear-gradient(
+    to right,
+    rgb(var(--rule) / 0.26) 0 1px,
+    transparent 1px var(--b-w)
+  );
+}
+
+.brick-band::before {
+  top: 0;
+}
+
+/* drugi red pomaknut za pola cigle */
+.brick-band::after {
+  bottom: 0;
+  background-position-x: calc(var(--b-w) / 2);
+}
+
+/* Zalijepljeni nav treba i podlogu, ne samo blur — inače tekst koji prolazi
+   ispod probija kroz logo. Boja prati --bg pa se sama zatamni s dolaskom noći. */
+#site-nav.is-stuck {
+  background-color: color-mix(in oklab, var(--bg) 82%, transparent);
+}
+
+/* ---------- utility ---------- */
+
+.shell {
+  padding-inline: var(--shell);
+}
+
+.hairline {
+  height: 1px;
+  background: rgb(var(--rule) / 0.2);
+}
+
+:where(a, button, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-brass);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

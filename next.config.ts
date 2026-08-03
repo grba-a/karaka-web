@@ -1,7 +1,8 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Klijent gleda dev server uživo — nikakav Next.js badge ne smije biti u kadru.
+  devIndicators: false,
 };
 
 export default nextConfig;
