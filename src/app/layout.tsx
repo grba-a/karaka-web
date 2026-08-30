@@ -1,9 +1,6 @@
 import type { Metadata, Viewport } from 'next';
-import { Fraunces, Archivo, DM_Mono } from 'next/font/google';
+import { Fraunces, Familjen_Grotesk, DM_Mono } from 'next/font/google';
 import './globals.css';
-import SmoothScroll from '@/components/SmoothScroll';
-import DayNight from '@/components/DayNight';
-import Grain from '@/components/ui/Grain';
 import { venue } from '@/content/site';
 
 const fraunces = Fraunces({
@@ -13,10 +10,13 @@ const fraunces = Fraunces({
   axes: ['SOFT', 'WONK', 'opsz'],
 });
 
-const archivo = Archivo({
+// Familjen Grotesk umjesto neutralnog groteska: ima stvarne idiosinkrazije
+// (rep na 'a', jednokatni 'g') pa tekst ne izgleda kao default. latin-ext
+// pokriva č/ć/š/ž/đ iz adrese.
+const familjen = Familjen_Grotesk({
   subsets: ['latin-ext'],
   display: 'swap',
-  variable: '--font-archivo',
+  variable: '--font-familjen',
 });
 
 const dmMono = DM_Mono({
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     title: `${venue.fullName} — ${venue.tagline}`,
     description:
       'Guinness on draught, every match that matters, and a stone lane forty steps off the Stradun.',
-    images: [{ url: '/img/hero-lantern.webp', width: 800, height: 1201 }],
+    images: [{ url: '/img/alley-crowd.webp', width: 1066, height: 1600 }],
   },
   alternates: { canonical: '/' },
 };
@@ -101,13 +101,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${archivo.variable} ${dmMono.variable}`}
+      className={`${fraunces.variable} ${familjen.variable} ${dmMono.variable}`}
     >
       <body>
-        <SmoothScroll />
-        <DayNight />
         {children}
-        <Grain />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

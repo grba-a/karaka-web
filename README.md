@@ -1,7 +1,11 @@
 # Irish Pub Karaka — „Port of Call"
 
 Novi web za **Irish Pub Karaka**, Ul. Između polača 5, Stari grad Dubrovnik.
-Jedan landing page, engleski, Next.js App Router.
+Jedna prodajna stranica, engleski, Next.js App Router.
+
+**v2 — KISS.** v1 je bila magazin (12 500 px, esej o etimologiji prije ijednog
+razloga za dolazak). v2 ima šest sekcija i jedan cilj: **dovesti gosta u lokal
+sada**. Primarni CTA je *Get directions*, i sve prije njega samo skida prepreke.
 
 **Dev:** `http://localhost:3400`
 
@@ -9,33 +13,37 @@ Jedan landing page, engleski, Next.js App Router.
 
 ## Koncept
 
-Karaka je bio dubrovački trgovački jedrenjak 15.–16. stoljeća; engleski ga je
-zapamtio kao *argosy* (od „Ragusea"), a te su karake plovile u britanske i irske
-luke. Irski pub u Dubrovniku koji se zove Karaka zato nije kostim nego najstarija
-trgovačka ruta između ta dva mora.
+Stranica ima jedan posao: gost šeće Starim gradom, žedan je, i mora završiti u
+Karaki. Zato je struktura AIDA, a ne magazin:
 
-Drugi, fizički dio priče: **svaki stol u pubu nosi ugraviran grb drugog irskog
-puba iz svijeta** — Saint James 1967, Lynch's (Jax Beach), O'Brien's, The Inn Pub
-(Kerrville, Texas). Taj ugravirani grb je signature motiv cijelog weba.
+| # | Sekcija | Na koje gostovo pitanje odgovara |
+|---|---|---|
+| 1 | **Hero** | „Je li otvoreno i gdje je?" |
+| 2 | **Reasons** | „Zašto baš ovdje?" |
+| 3 | **Proof** | „Je li stvarno dobro?" |
+| 4 | **Offer** | „Što točno dobivam?" |
+| 5 | **Find Us** | „Kako da dođem?" |
 
-### Vizualni luk: dan → noć
+Ime nosi jednu rečenicu priče u footeru: karaka je bio dubrovački jedrenjak koji
+je engleski zapamtio kao *argosy* i koji je plovio u irske luke. Ugravirani grb
+(`ui/Crest.tsx`) preživio je kao mala oznaka u footeru i kao favicon.
 
-Stranica kreće na vapnenačkoj podlozi (uličica u 9 ujutro) i scrollom se zatamnjuje
-do noćnog puba (02:00). Ton se ne računa iz postotka scrolla nego se veže na
-sekcije preko `data-tone`; prijelaz iz svijetlog u tamno pada točno na Matchday,
-koji ima vlastiti neprozirni bottle-green panel, pa se zamjena dogodi iza njega.
+**Ocjene se namjerno ne prikazuju.** Google je 4,1, Tripadvisor 3,5 — isticanje
+broja bi štetilo, pa dokaz ide preko biranih citata i fotografija pune sale.
 
 ### Paleta i pismo
 
 | Token | Uloga |
 |---|---|
-| `#EDE6D8` vapnenac | dan, vrh stranice |
-| `#DDD0B9` pijesak · `#C9B49B` glina | prijelaz |
-| `#14100D` noć | dno stranice |
-| `#1E3A2B` bottle green | Matchday panel |
-| `#B08A4A` mjed | gravure, brojevi, linije |
+| `#EDE6D8` vapnenac | svijetla zona (hero, razlozi, dokaz) |
+| `#14100D` noć | tamna zona (ponuda, lokacija, footer) |
+| `#B08A4A` / `#D9B478` mjed | naglasak, gumbi u tamnoj zoni |
+| `#9C4A2F` cigla | naglasak u svijetloj zoni |
 
-**Fraunces** (display) · **Archivo** (tekst) · **DM Mono** (labeli, manifest liste)
+**Fraunces** (display) · **Familjen Grotesk** (tekst) · **DM Mono** (labeli)
+
+Gumbi (`ui/Cta.tsx`) su emajlirana pub-tabla: pravokutnik s uvučenom drugom
+linijom koja se na hoveru raširi prema rubu — ne generična pilula.
 
 ---
 
@@ -57,15 +65,41 @@ npm run dev      # http://localhost:3400
 ```
 src/
 ├── app/            layout (fontovi, JSON-LD), globals.css, icon.svg
-├── components/     jedna komponenta po sekciji stranice
-│   ├── SmoothScroll.tsx   Lenis ↔ gsap.ticker most
-│   ├── DayNight.tsx       globalni --bg/--fg luk po data-tone
-│   ├── StickyBar.tsx      mobilna CTA traka (Directions | Call)
-│   └── ui/                Crest, Cta, Reveal, Grain
-├── content/site.ts SAV copy i podaci — jedina datoteka koju treba dirati
-│                   kad klijent pošalje meni, cijene ili raspored
-└── lib/gsap.ts     registracija plugina, prepReveal/enterIn helperi
+├── lib/
+│   ├── openState.ts  živi status po satu u Dubrovniku
+│   └── gsap.ts       jedini scroll reveal na stranici
+├── content/site.ts   SAV copy i podaci — jedina datoteka koju treba dirati
+│                     kad klijent pošalje meni, cijene ili raspored
+└── components/
+    ├── Hero.tsx      živi hero (CSS intro, dnevna/noćna fotka)
+    ├── Reasons.tsx   tri razloga za dolazak
+    ├── Proof.tsx     citati gostiju + fotke pune sale
+    ├── Offer.tsx     na točioniku / na ekranu / na stolu
+    ├── FindUs.tsx    zatvaranje: adresa, radno vrijeme, upute
+    ├── Nav.tsx  Footer.tsx
+    └── ui/           Cta, Crest, Reveal
 ```
+
+### Živi hero
+
+`lib/openState.ts` računa sat **u Dubrovniku** (`Intl.DateTimeFormat` s
+`timeZone: 'Europe/Zagreb'`), neovisno o tome gdje je gost — turist iz Londona
+ne smije dobiti „Closed" jer je kod njega sat manje. Radno vrijeme 09:00–02:00
+daje pet stanja (morning / afternoon / evening / night / closed), a svako mijenja
+rečenicu ispod naslova.
+
+Fotografija: SSR uvijek renderira **dnevnu** (`priority`, zbog LCP-a). Tek kad je
+u Dubrovniku mrak klijent dovuče **noćnu** i crossfadea. Gost koji dođe danju
+noćnu fotku nikad ni ne skine. Živo stanje se računa u `useEffect` (SSR default =
+popodne), pa nema hydration mismatcha.
+
+Provjera svih pet stanja: `node scripts/dev/live-hero-check.mjs`.
+
+### Boja bez mašinerije
+
+Dvije fiksne zone — `.zone-light` (vapnenac + tinta) i `.zone-dark` (noć + krem).
+Granica je namjeran tvrd rez između Proofa i Offera, „ulazak unutra". Nula JS-a i
+nula trenutaka u kojima se tekst i podloga križaju u nečitljivu sivu.
 
 ### Slike
 
@@ -73,31 +107,31 @@ src/
 `scripts/images.mjs` i izbaci webp u `public/img`. Generirani `public/img` i
 `public/video` su u repozitoriju da build ne ovisi o lokalnom folderu.
 
-Izvori su WhatsApp-komprimirani (1066×1600, uglavnom portret) i videa 576×1024 —
-zato je layout portretno-prvi. **Originali iz fotoaparata bi web podigli za razred.**
+Izvori su WhatsApp-komprimirani (1066×1600, uglavnom portret) — zato hero ima jak
+scrim, a layout je portretno-prvi. **Originali iz fotoaparata bi web podigli za
+razred.**
 
 ---
 
 ## Animacije
 
-GSAP 3 + ScrollTrigger, Lenis za smooth scroll. Sve u `useLayoutEffect` +
-`gsap.context()` s cleanupom.
+Namjerno malo. Hero je **čisti CSS** (`globals.css`) jer se mora nacrtati prije
+nego JS stigne — isti naslov na GSAP-u je na drugom projektu digao mobilni LCP na
+5 s. Sve ispod heroja koristi jedan zajednički reveal iz `lib/gsap.ts` (fade +
+rise, jednom). Traka kanala je CSS animacija.
 
-Tri zamke koje su već riješene i ne treba ih ponovno uvoditi:
+Nema Lenisa, pinnanja, paralaksa ni horizontalnog scrolla.
+`prefers-reduced-motion` gasi sve.
+
+Zamke koje su riješene i ne treba ih ponovno uvoditi:
 
 1. **Početno stanje ne smije ostati samo u CSS-u.** `getComputedStyle` vraća
    transform kao matricu, pa GSAP postotak iz `translate3d(0,105%,0)` upiše kao
-   piksele i `yPercent: 0` nema što animirati. Zato `prepReveal()` radi
-   `gsap.set(..., { y: 0, yPercent: 105 })`.
+   piksele i `yPercent: 0` nema što animirati.
 2. **Tailwind v4 `translate-y-*` se ne miješa s GSAP-om** — v4 to piše u
    `translate:`, koji GSAP ugasi. Na animiranim elementima se ne koristi.
-3. **ScrollTrigger ne dobiva update od programatskog scrolla** dok scroll ide kroz
-   Lenis. Za obično pokaži/sakrij (mobilna CTA traka) koristi se
-   IntersectionObserver, ne ScrollTrigger.
-
-Mobitel (`gsap.matchMedia()`, `< 768px`): bez pinnanja i paralaksa, horizontalna
-traka postaje native swipe, tonski luk ima dvije stanice umjesto četiri.
-`prefers-reduced-motion` gasi Lenis i sve reveal animacije.
+3. **Tailwindov `hidden` ne pobjeđuje pouzdano `inline-flex` iz baze komponente** —
+   sakrivanje ide na omotač (`<span className="hidden md:block">`), ne na `Cta`.
 
 ---
 
@@ -105,12 +139,12 @@ traka postaje native swipe, tonski luk ima dvije stanice umjesto četiri.
 
 ```bash
 npm run build
-node scripts/dev/webkit-check.mjs   # traži: npm i -D playwright
+node scripts/dev/live-hero-check.mjs   # pet stanja živog heroja
+node scripts/dev/webkit-check.mjs      # mobilni WebKit
 ```
 
-WebKit provjera je odvojena jer Chrome mobile emulacija propušta bugove ovisne o
-engineu. `playwright` namjerno **nije** u `devDependencies` — njegov postinstall
-skida browsere i usporio bi Vercel build.
+Oba skripta traže `npm i -D playwright` lokalno. `playwright` namjerno **nije** u
+`devDependencies` — njegov postinstall skida browsere i usporio bi Vercel build.
 
 ---
 

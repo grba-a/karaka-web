@@ -1,62 +1,22 @@
 'use client';
 
 import { useRef } from 'react';
-import { useIsomorphicLayoutEffect, gsap, EASE, prepReveal, scoped } from '@/lib/gsap';
-import { venue, partners, nav } from '@/content/site';
+import { useReveal } from '@/lib/gsap';
+import { venue, partners, footer, nav } from '@/content/site';
 import Crest from './ui/Crest';
 
+/**
+ * Footer. Ovdje živi ono što je u v1 bila cijela sekcija: priča o imenu,
+ * svedena na jednu rečenicu. Tko je došao do dna, zaslužio je i to.
+ */
 export default function Footer() {
   const root = useRef<HTMLElement>(null);
-
-  useIsomorphicLayoutEffect(() => {
-    const ctx = gsap.context((self) => {
-      const q = scoped(self);
-      const { lines } = prepReveal(q);
-
-      const tl = gsap.timeline({
-        scrollTrigger: { trigger: root.current, start: 'top 82%', once: true },
-      });
-      tl.to(lines, { yPercent: 0, duration: 1.2, ease: EASE.out, stagger: 0.08 })
-        .to(q('[data-fade]'), { opacity: 1, y: 0, duration: 0.8, ease: EASE.soft, stagger: 0.05 }, 0.2);
-
-      // grb se iscrtava kao pečat na kraju stranice
-      const strokes = q('[data-crest] circle, [data-crest] path') as SVGGeometryElement[];
-      strokes.forEach((p) => {
-        const len = p.getTotalLength?.() ?? 0;
-        if (len) gsap.set(p, { strokeDasharray: len, strokeDashoffset: len });
-      });
-      if (strokes.length) {
-        tl.to(strokes, { strokeDashoffset: 0, duration: 1.6, ease: 'power2.inOut', stagger: 0.015 }, 0.1)
-          .to(q('[data-crest-text]'), { opacity: 1, duration: 0.6 }, 0.9);
-      }
-    }, root);
-
-    return () => ctx.revert();
-  }, []);
+  useReveal(root, 'top 88%');
 
   return (
-    <footer ref={root} data-tone="night" className="relative pb-28 pt-20 md:pb-12 md:pt-28">
+    <footer ref={root} className="zone-dark relative pb-12 pt-16 md:pt-20">
       <div className="shell mx-auto max-w-[1500px]">
-        <div className="grid gap-14 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-          <div>
-            <p data-fade className="label mb-8 opacity-45">
-              {venue.tagline}
-            </p>
-            <p className="display text-[clamp(3rem,11vw,9rem)]">
-              <span className="reveal-line">
-                <span>Sláinte</span>
-              </span>
-            </p>
-          </div>
-
-          <Crest
-            draw
-            className="hidden h-40 w-40 lg:block"
-            style={{ color: 'var(--color-brass)' }}
-          />
-        </div>
-
-        <div className="rule-t mt-16 grid gap-10 pt-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rule-t grid gap-10 pt-12 sm:grid-cols-2 lg:grid-cols-4">
           <div data-fade>
             <p className="label mb-4 opacity-45">Find us</p>
             <address className="not-italic leading-relaxed">
@@ -77,16 +37,24 @@ export default function Footer() {
             <p className="label mb-4 opacity-45">Say hello</p>
             <ul className="space-y-1.5">
               <li>
-                <a href={`tel:${venue.phoneHref}`} className="display-sub text-[1.0625rem] transition-opacity hover:opacity-70">
+                <a
+                  href={`tel:${venue.phoneHref}`}
+                  className="display-sub text-[1.0625rem] transition-opacity hover:opacity-70"
+                >
                   {venue.phone}
                 </a>
               </li>
               <li>
-                <a href={`mailto:${venue.email}`} className="text-[0.9375rem] opacity-60 transition-opacity hover:opacity-100">
+                <a
+                  href={`mailto:${venue.email}`}
+                  className="text-[0.9375rem] opacity-60 transition-opacity hover:opacity-100"
+                >
                   {venue.email}
                 </a>
               </li>
-              <li className="mono pt-2 text-[0.8125rem] opacity-55">{venue.hours} · every day</li>
+              <li className="mono pt-2 text-[0.8125rem] opacity-55">
+                {venue.hours} · every day
+              </li>
             </ul>
           </div>
 
@@ -134,7 +102,21 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="rule-t mt-14 flex flex-wrap items-center justify-between gap-x-8 gap-y-4 pt-6">
+        {/* --------------------------------- cijela priča o imenu, u jednoj rečenici */}
+        <div
+          data-fade
+          className="rule-t mt-14 flex flex-col gap-8 pt-12 sm:flex-row sm:items-center sm:gap-12"
+        >
+          <Crest className="h-20 w-20 shrink-0 opacity-70" style={{ color: 'var(--color-brass)' }} />
+          <p
+            className="max-w-[62ch] text-[0.9375rem] leading-relaxed"
+            style={{ color: 'color-mix(in oklab, var(--fg) 62%, transparent)' }}
+          >
+            {footer.story}
+          </p>
+        </div>
+
+        <div className="rule-t mt-12 flex flex-wrap items-center justify-between gap-x-8 gap-y-4 pt-6">
           <p className="label opacity-35">
             © {new Date().getFullYear()} {venue.fullName}
           </p>

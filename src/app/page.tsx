@@ -1,33 +1,30 @@
 import Nav from '@/components/Nav';
 import Hero from '@/components/Hero';
-import Route from '@/components/Route';
-import Tap from '@/components/Tap';
-import Tables from '@/components/Tables';
-import Matchday from '@/components/Matchday';
-import Ambience from '@/components/Ambience';
-import Bites from '@/components/Bites';
-import Alley from '@/components/Alley';
-import Voices from '@/components/Voices';
+import Reasons from '@/components/Reasons';
+import Proof from '@/components/Proof';
+import Offer from '@/components/Offer';
+import FindUs from '@/components/FindUs';
 import Footer from '@/components/Footer';
-import StickyBar from '@/components/StickyBar';
 
+/**
+ * Jedna prodajna stranica.
+ *
+ * Svijetla zona (hero → razlozi → dokaz) gradi želju, tamna zona
+ * (ponuda → lokacija → footer) je zatvara. Granica između Proofa i Offera je
+ * namjeran tvrd rez — „ulazak unutra".
+ */
 export default function Page() {
   return (
     <>
       <Nav />
       <main>
         <Hero />
-        <Route />
-        <Tap />
-        <Tables />
-        <Matchday />
-        <Ambience />
-        <Bites />
-        <Alley />
-        <Voices />
+        <Reasons />
+        <Proof />
+        <Offer />
+        <FindUs />
       </main>
       <Footer />
-      <StickyBar />
     </>
   );
 }

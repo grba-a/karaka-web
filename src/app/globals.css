@@ -1,37 +1,55 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------ *
- *  KARAKA — „Port of Call"
- *  Vizualni luk: vapnenac (09:00) → pijesak → cigla → noć (02:00).
- *  --bg / --fg animira jedan globalni ScrollTrigger (DayNight.tsx);
- *  sve sekcije su prozirne i sjede na tom jednom prijelazu.
+ *  KARAKA — prodajna stranica
+ *
+ *  Boja NIJE animirana scrollom. Dvije fiksne zone:
+ *    .zone-light  vapnenac + tinta   (hero, razlozi, dokaz)
+ *    .zone-dark   noć + krem         (ponuda, lokacija, footer)
+ *  Granica je namjeran tvrd rez — „ulazak unutra". Nula JS-a, nula
+ *  trenutka u kojem se tekst i podloga križaju u nečitljivu sivu.
  * ------------------------------------------------------------------ */
 
 @theme {
   --color-limestone: #ede6d8;
-  --color-sand: #d9cdb8;
+  --color-sand: #ddd0b9;
   --color-brick: #9c4a2f;
-  --color-brick-deep: #5d2a1c;
   --color-night: #14100d;
   --color-bottle: #1e3a2b;
-  --color-sign: #2f8f55;
   --color-brass: #b08a4a;
   --color-brass-lit: #d9b478;
   --color-ink: #171412;
+  --color-cream: #efe6d9;
 
   --font-display: var(--font-fraunces);
-  --font-body: var(--font-archivo);
+  --font-body: var(--font-familjen);
   --font-mono: var(--font-dm-mono);
 }
 
 :root {
-  /* žive vrijednosti — GSAP ih mijenja po scrollu */
   --bg: #ede6d8;
   --fg: #171412;
   --rule: 23 20 18;
   --accent: #9c4a2f;
-
   --shell: clamp(1.25rem, 5vw, 5.5rem);
+}
+
+.zone-light {
+  --bg: #ede6d8;
+  --fg: #171412;
+  --rule: 23 20 18;
+  --accent: #9c4a2f;
+  background-color: var(--bg);
+  color: var(--fg);
+}
+
+.zone-dark {
+  --bg: #14100d;
+  --fg: #efe6d9;
+  --rule: 239 230 217;
+  --accent: #d9b478;
+  background-color: var(--bg);
+  color: var(--fg);
 }
 
 * {
@@ -39,18 +57,16 @@
 }
 
 html {
-  background-color: var(--bg);
+  background-color: #ede6d8;
   -webkit-text-size-adjust: 100%;
-  scroll-behavior: auto;
 }
 
 body {
-  background-color: var(--bg);
-  color: var(--fg);
   font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   font-synthesis-weight: none;
   -webkit-font-smoothing: antialiased;
   overflow-x: clip;
+  background-color: #14100d; /* iza zadnje zone, da nema bijelog bouncea */
 }
 
 ::selection {
@@ -58,27 +74,13 @@ body {
   color: #14100d;
 }
 
-/* Papirnata zrnatost preko cijele stranice — „starinski" bez kiča.
-   Fiksna, pa ne košta ništa na scrollu.
-
-   Bez mix-blend-modea: overlay/soft-light preko fiksnog <header>a koji ima
-   vlastiti kompozitni sloj ostavlja vidljiv pravokutni šav u gornjem lijevom
-   kutu. Obična niska prozirnost radi jednako dobro i na vapnencu i na noći. */
-.grain-layer {
-  position: fixed;
-  inset: -60px;
-  z-index: 60;
-  pointer-events: none;
-  opacity: 0.055;
-}
-
-/* ---------- tipografija ---------- */
+/* ---------------------------------------------------- tipografija ------ */
 
 .display {
   font-family: var(--font-display), Georgia, serif;
   font-variation-settings: "SOFT" 40, "WONK" 1, "opsz" 144;
   font-weight: 500;
-  line-height: 0.85;
+  line-height: 0.88;
   letter-spacing: -0.035em;
   text-wrap: balance;
 }
@@ -87,7 +89,7 @@ body {
   font-family: var(--font-display), Georgia, serif;
   font-variation-settings: "SOFT" 24, "WONK" 1, "opsz" 40;
   font-weight: 400;
-  line-height: 1.06;
+  line-height: 1.08;
   letter-spacing: -0.018em;
   text-wrap: pretty;
 }
@@ -98,7 +100,6 @@ body {
   line-height: 1;
   letter-spacing: 0.26em;
   text-transform: uppercase;
-  font-weight: 400;
 }
 
 .mono {
@@ -107,52 +108,143 @@ body {
 }
 
 .prose-lead {
-  font-size: clamp(1.0625rem, 1.5vw, 1.3125rem);
+  font-size: clamp(1.0625rem, 1.4vw, 1.25rem);
   line-height: 1.62;
-  letter-spacing: -0.005em;
   text-wrap: pretty;
 }
 
-/* ---------- reveal primitives ---------- *
- * Elementi kreću skriveni preko CSS-a, GSAP ih otkriva. Ako JS ne
- * proradi ili je reduced-motion, <html class="is-static"> ih vrati. */
+/* ---------------------------------------------------- hero intro ------- *
+ * Namjerno u CISTOM CSS-u, ne u GSAP-u: isti naslov na GSAP-u je na drugom
+ * projektu digao mobilni LCP na 5 s, a iste keyframes u CSS-u vratile ga na
+ * 0,1 s. Hero se mora nacrtati prije nego JS uopće stigne. */
 
-.reveal-line {
+@keyframes rise {
+  from {
+    transform: translate3d(0, 105%, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slow-zoom {
+  from {
+    transform: scale(1.1);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.82);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.hero-line {
   display: block;
   overflow: hidden;
   padding-bottom: 0.12em;
   margin-bottom: -0.12em;
 }
 
-/* Početna stanja: samo protiv bljeska prije hidracije. Čim GSAP preuzme,
-   prepReveal() ih prepiše svojim vrijednostima (vidi lib/gsap.ts). */
-.reveal-line > span {
+.hero-line > span {
   display: block;
-  transform: translate3d(0, 105%, 0);
-  will-change: transform;
+  animation: rise 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 90ms + 120ms);
 }
 
-.reveal-mask {
-  clip-path: inset(0% 0% 100% 0%);
-  will-change: clip-path;
+.hero-up {
+  animation: fade-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--d, 0ms);
 }
+
+.hero-img {
+  animation: slow-zoom 2.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hero-scrim {
+  animation: scrim-in 1.2s ease-out both;
+}
+
+.live-dot {
+  animation: pulse-dot 2.4s ease-in-out infinite;
+}
+
+/* Traka kanala — dupliran sadržaj pa je -50 % točno jedan ciklus.
+   Maska na rubovima: bez nje se imena režu na pola i izgleda kao greška. */
+.marquee {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 8%,
+    #000 92%,
+    transparent
+  );
+}
+
+.marquee-track {
+  animation: marquee 26s linear infinite;
+}
+
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* ------------------------------------------------- scroll reveal ------- *
+ * Jedini JS reveal na stranici (lib/gsap.ts). CSS drži početno stanje da
+ * nema bljeska prije hidracije. */
 
 [data-fade] {
   opacity: 0;
-  will-change: opacity, transform;
 }
 
-.is-static .reveal-line > span,
 .is-static [data-fade] {
-  transform: none !important;
   opacity: 1 !important;
+  transform: none !important;
 }
 
-.is-static .reveal-mask {
-  clip-path: inset(0 0 0 0) !important;
-}
+/* ---------------------------------------------------------- utility ---- */
 
-/* ---------- ledger / cigla ---------- */
+.shell {
+  padding-inline: var(--shell);
+}
 
 .rule-t {
   border-top: 1px solid rgb(var(--rule) / 0.18);
@@ -160,63 +252,6 @@ body {
 
 .rule-b {
   border-bottom: 1px solid rgb(var(--rule) / 0.18);
-}
-
-/* Ciglasti vez kao razdjelnik između sekcija.
-   Dva reda cigle u pomaku od pola cigle (running bond) — bez ijedne slike.
-   Cigle su namjerno velike i rijetke: sitniji raster odmah počne izgledati
-   kao karirani papir, a ne kao zid. */
-.brick-band {
-  --b-w: 132px;
-  --b-h: 30px;
-  --b-gap: 5px;
-  position: relative;
-  height: calc(var(--b-h) * 2 + var(--b-gap));
-  overflow: hidden;
-  mask-image: linear-gradient(
-    to right,
-    transparent,
-    #000 14%,
-    #000 86%,
-    transparent
-  );
-}
-
-.brick-band::before,
-.brick-band::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: var(--b-h);
-  border-block: 1px solid rgb(var(--rule) / 0.26);
-  background-image: repeating-linear-gradient(
-    to right,
-    rgb(var(--rule) / 0.26) 0 1px,
-    transparent 1px var(--b-w)
-  );
-}
-
-.brick-band::before {
-  top: 0;
-}
-
-/* drugi red pomaknut za pola cigle */
-.brick-band::after {
-  bottom: 0;
-  background-position-x: calc(var(--b-w) / 2);
-}
-
-/* Zalijepljeni nav treba i podlogu, ne samo blur — inače tekst koji prolazi
-   ispod probija kroz logo. Boja prati --bg pa se sama zatamni s dolaskom noći. */
-#site-nav.is-stuck {
-  background-color: color-mix(in oklab, var(--bg) 82%, transparent);
-}
-
-/* ---------- utility ---------- */
-
-.shell {
-  padding-inline: var(--shell);
 }
 
 .hairline {
