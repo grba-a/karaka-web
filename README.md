@@ -3,9 +3,12 @@
 Novi web za **Irish Pub Karaka**, Ul. Između polača 5, Stari grad Dubrovnik.
 Jedna prodajna stranica, engleski, Next.js App Router.
 
-**v2 — KISS.** v1 je bila magazin (12 500 px, esej o etimologiji prije ijednog
-razloga za dolazak). v2 ima šest sekcija i jedan cilj: **dovesti gosta u lokal
-sada**. Primarni CTA je *Get directions*, i sve prije njega samo skida prepreke.
+**v3 — mobile-first.** Najviše posjeta dolazi s mobitela, pa je stranica pisana
+od 390 px prema gore: **6 125 px** mobilne visine (v2 je imala 8 148), svi tap
+targeti ≥ 44 px, mali okrugli CTA u kutu nakon heroja.
+
+Jedan cilj: **dovesti gosta u lokal sada.** Primarni CTA je *Get directions*, i
+sve prije njega samo skida prepreke.
 
 **Dev:** `http://localhost:3400`
 
@@ -45,6 +48,12 @@ broja bi štetilo, pa dokaz ide preko biranih citata i fotografija pune sale.
 Gumbi (`ui/Cta.tsx`) su emajlirana pub-tabla: pravokutnik s uvučenom drugom
 linijom koja se na hoveru raširi prema rubu — ne generična pilula.
 
+**Znak** je zlatni ugravirani grb (`ui/Crest.tsx`), isti u headeru, footeru,
+faviconu i OG slici; oba znaka na stranici vode na `#top`. `mark` način daje
+verziju za male veličine — deblji potezi, bez teksta po kružnici i sitnih
+detalja koji se na 44 px pretvore u mrlju. Fizička tabla lokala ima drugi,
+rasterski logo (`assets/karaka-logo.png`, samo 160×192 px) — čeka se vektor.
+
 ---
 
 ## Pokretanje
@@ -64,20 +73,20 @@ npm run dev      # http://localhost:3400
 
 ```
 src/
-├── app/            layout (fontovi, JSON-LD), globals.css, icon.svg
+├── app/            layout (fontovi, JSON-LD, OG), globals.css, icon.svg
 ├── lib/
 │   ├── openState.ts  živi status po satu u Dubrovniku
 │   └── gsap.ts       jedini scroll reveal na stranici
 ├── content/site.ts   SAV copy i podaci — jedina datoteka koju treba dirati
 │                     kad klijent pošalje meni, cijene ili raspored
 └── components/
-    ├── Hero.tsx      živi hero (CSS intro, dnevna/noćna fotka)
-    ├── Reasons.tsx   tri razloga za dolazak
-    ├── Proof.tsx     citati gostiju + fotke pune sale
-    ├── Offer.tsx     na točioniku / na ekranu / na stolu
-    ├── FindUs.tsx    zatvaranje: adresa, radno vrijeme, upute
+    ├── Hero.tsx      jedna fotka, živa rečenica, CSS intro
+    ├── Reasons.tsx   tri razloga + traka brojeva
+    ├── Proof.tsx     citati gostiju + fotke pune sale + linkovi na platforme
+    ├── Offer.tsx     na točioniku / na ekranu
+    ├── FindUs.tsx    lokacijska sekcija preko cijele širine
     ├── Nav.tsx  Footer.tsx
-    └── ui/           Cta, Crest, Reveal
+    └── ui/           Cta, Crest, Logo, SocialIcon, FloatingCta, Reveal
 ```
 
 ### Živi hero
@@ -88,10 +97,9 @@ ne smije dobiti „Closed" jer je kod njega sat manje. Radno vrijeme 09:00–02:
 daje pet stanja (morning / afternoon / evening / night / closed), a svako mijenja
 rečenicu ispod naslova.
 
-Fotografija: SSR uvijek renderira **dnevnu** (`priority`, zbog LCP-a). Tek kad je
-u Dubrovniku mrak klijent dovuče **noćnu** i crossfadea. Gost koji dođe danju
-noćnu fotku nikad ni ne skine. Živo stanje se računa u `useEffect` (SSR default =
-popodne), pa nema hydration mismatcha.
+**Fotografija je jedna i nepromjenjiva** (`alley-crowd` — uličica s lampionom).
+Živa je samo rečenica; slika ne titra. Stanje se računa u `useEffect` (SSR
+default = popodne), pa nema hydration mismatcha.
 
 Provjera svih pet stanja: `node scripts/dev/live-hero-check.mjs`.
 
@@ -141,6 +149,7 @@ Zamke koje su riješene i ne treba ih ponovno uvoditi:
 npm run build
 node scripts/dev/live-hero-check.mjs   # pet stanja živog heroja
 node scripts/dev/webkit-check.mjs      # mobilni WebKit
+npm run og                             # regeneriraj OG sliku za dijeljenje
 ```
 
 Oba skripta traže `npm i -D playwright` lokalno. `playwright` namjerno **nije** u

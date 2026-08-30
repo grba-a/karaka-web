@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     title: `${venue.fullName} — ${venue.tagline}`,
     description:
       'Guinness on draught, every match that matters, and a stone lane forty steps off the Stradun.',
-    images: [{ url: '/img/alley-crowd.webp', width: 1066, height: 1600 }],
+    images: [{ url: '/og.jpg', width: 1200, height: 630, alt: `${venue.fullName} — ${venue.tagline}` }],
   },
   alternates: { canonical: '/' },
 };

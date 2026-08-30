@@ -5,6 +5,7 @@ import Proof from '@/components/Proof';
 import Offer from '@/components/Offer';
 import FindUs from '@/components/FindUs';
 import Footer from '@/components/Footer';
+import FloatingCta from '@/components/ui/FloatingCta';
 
 /**
  * Jedna prodajna stranica.
@@ -25,6 +26,7 @@ export default function Page() {
         <FindUs />
       </main>
       <Footer />
+      <FloatingCta />
     </>
   );
 }

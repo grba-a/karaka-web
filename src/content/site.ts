@@ -19,8 +19,15 @@ export const venue = {
   hoursNote: 'Seven days a week', // pending: potvrditi s klijentom
   maps: 'https://maps.google.com/?q=Irish+Pub+Karaka+Dubrovnik',
   social: {
-    instagram: 'https://www.instagram.com/irishpubkarakadubrovnik/',
-    facebook: 'https://www.facebook.com/irishpubkaraka/',
+    instagram: 'https://www.instagram.com/irishpubkarakadubrovnik/?hl=en',
+    facebook: 'https://web.facebook.com/irishpubkaraka/?_rdc=1&_rdr',
+    tripadvisor:
+      'https://www.tripadvisor.com/Restaurant_Review-g295371-d3795288-Reviews-Irish_Pub_Karaka-Dubrovnik_Dubrovnik_Neretva_County_Dalmatia.html',
+  },
+  // Linkamo na platforme, ali NE prikazujemo ocjenu: Google je 4,1 a
+  // Tripadvisor 3,5 — broj bi odbijao, a link i dalje daje kredibilitet.
+  reviews: {
+    google: 'https://maps.google.com/?q=Irish+Pub+Karaka+Dubrovnik',
   },
 } as const;
 
@@ -46,6 +53,13 @@ export const reasons = {
   index: '01',
   label: 'Why here',
   title: 'Three good reasons',
+  // Samo provjerljivi brojevi. „Forty steps" ostaje izraz u tekstu i namjerno
+  // NIJE ovdje — nije izmjereno, a u ovoj traci bi izgledalo kao podatak.
+  stats: [
+    { v: '6', k: 'on tap' },
+    { v: '09 — 02', k: 'every day' },
+    { v: '7', k: 'days a week' },
+  ],
   items: [
     {
       n: '01',
@@ -92,6 +106,7 @@ export const proof = {
     { quote: 'Great music, great crowd, and a shockingly clean washroom.', source: 'Tripadvisor' },
     { quote: 'Friendly staff who remember you the second time you walk in.', source: 'Tripadvisor' },
   ],
+  reviewsCta: 'Read more on',
   gallery: [
     { img: 'bar-counter', alt: 'Guests at the bar of Irish Pub Karaka with a pint of Guinness' },
     { img: 'board-neon-guests', alt: 'Guests at a table beneath the green neon draught board' },
@@ -133,17 +148,9 @@ export const offer = {
     footnote: 'Ask us to put your match on. We usually can.',
     cta: 'Call the bar',
   },
-  table: {
-    title: 'On the table',
-    // pending: potvrditi meni i cijene — namjerno bez cijena dok ne stignu
-    items: [
-      { name: 'Falafel', note: 'Herbs, tahini, warm flatbread' },
-      { name: 'Beetroot patty', note: 'The one the vegetarians come back for' },
-      { name: 'Pulled beef', note: 'Slow, dark, generous' },
-      { name: 'Classics', note: 'The list on the table, all day' },
-    ],
-    footnote: 'Full menu and prices at the table.',
-  },
+  // Karaka nema kuhinju. Bolje to reći nego šutjeti — gost koji se pita za
+  // hranu dobiva odgovor, a partnerski lokali iz footera dobivaju smisao.
+  kitchen: 'No kitchen of our own — Burger Tiger and Pasta Lab are two doors down.',
 };
 
 /* ---------------------------------------------------------------- FIND US */
@@ -158,19 +165,3 @@ export const findUs = {
   img: 'alley-crowd',
   alt: 'The narrow limestone lane Između polača, busy beneath the Irish Pub Karaka lantern',
 };
-
-/* ----------------------------------------------------------------- FOOTER */
-
-export const footer = {
-  /** Cijela priča o imenu, u jednoj rečenici. */
-  story:
-    'A karaka was a Ragusan ship. The English could not say “Ragusea”, so they ' +
-    'called it an argosy, and they sailed it into Irish ports. The name stayed.',
-};
-
-export const partners = [
-  { name: 'Restaurant Sesame', href: 'https://sesame.hr/' },
-  { name: 'Cafe Festival', href: 'https://cafefestival.hr/' },
-  { name: 'Burger Tiger', href: null },
-  { name: 'Pasta Lab', href: null },
-];

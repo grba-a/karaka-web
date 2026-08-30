@@ -17,7 +17,7 @@ export default function Reasons() {
   useReveal(root, 'top 80%');
 
   return (
-    <section id="why" ref={root} className="zone-light relative py-20 md:py-28">
+    <section id="why" ref={root} className="zone-light relative py-14 md:py-28">
       <div className="shell mx-auto max-w-[1500px]">
         <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-4">
           <h2 data-fade className="display text-[clamp(2.1rem,5vw,3.75rem)]">
@@ -28,10 +28,10 @@ export default function Reasons() {
           </p>
         </div>
 
-        <ul className="mt-12 grid gap-10 md:mt-16 md:grid-cols-3 md:gap-7">
+        <ul className="mt-10 grid gap-9 md:mt-16 md:grid-cols-3 md:gap-7">
           {reasons.items.map((item) => (
             <li key={item.n} data-fade className="group">
-              <figure className="relative aspect-[4/5] overflow-hidden md:aspect-[3/4]">
+              <figure className="relative aspect-[3/2] overflow-hidden sm:aspect-[4/5] md:aspect-[3/4]">
                 <Image
                   src={`/img/${item.img}.webp`}
                   alt={item.alt}
@@ -60,6 +60,19 @@ export default function Reasons() {
             </li>
           ))}
         </ul>
+
+        {/* Brojevi se skeniraju brže od pridjeva. Samo provjerljivi. */}
+        <dl
+          data-fade
+          className="rule-t mt-12 grid grid-cols-3 gap-4 pt-8 md:mt-16 md:gap-8 md:pt-10"
+        >
+          {reasons.stats.map((stat) => (
+            <div key={stat.k} className="flex flex-col gap-1.5">
+              <dt className="display text-[clamp(1.75rem,4vw,3rem)]">{stat.v}</dt>
+              <dd className="label opacity-50">{stat.k}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   );

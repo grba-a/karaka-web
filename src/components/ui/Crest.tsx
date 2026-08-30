@@ -26,6 +26,10 @@ type Props = {
   sub?: string;
   /** false = prikaži samo vanjske prstenove i lukove teksta (okvir za fotku) */
   core?: boolean;
+  /** true = verzija za male veličine (header, ~44 px).
+   *  Deblji potezi, bez teksta po kružnici, bez unutarnjeg prstena i bočnih
+   *  jarbola — na 44 px se ti detalji ionako pretvore u mrlju. */
+  mark?: boolean;
   className?: string;
   style?: React.CSSProperties;
   draw?: boolean;
@@ -40,6 +44,7 @@ export default function Crest({
   center = 'PORT OF CALL',
   sub,
   core = true,
+  mark = false,
   className,
   style,
   draw = false,
@@ -50,6 +55,8 @@ export default function Crest({
   // a dvotočke iz njega izbacujemo da id ostane čist za href="#…".
   const uid = `crest-${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
   const hidden = draw ? { opacity: 0 } : undefined;
+  // potezi se u mark načinu podebljaju da znak preživi 44 px
+  const w = (n: number) => (mark ? n * 2.1 : n);
   const coreStyle = {
     opacity: core ? 1 : 0,
     transition: 'opacity 600ms cubic-bezier(.16,1,.3,1)',
@@ -73,18 +80,21 @@ export default function Crest({
       </defs>
 
       <g stroke="currentColor">
-        <circle cx="100" cy="100" r="96" strokeWidth="0.75" opacity="0.5" />
-        <circle cx="100" cy="100" r="91" strokeWidth="2.25" />
-        <circle
-          cx="100"
-          cy="100"
-          r="63"
-          strokeWidth="0.75"
-          opacity="0.5"
-          style={coreStyle}
-        />
+        {!mark && <circle cx="100" cy="100" r="96" strokeWidth="0.75" opacity="0.5" />}
+        <circle cx="100" cy="100" r={mark ? 88 : 91} strokeWidth={w(2.25)} />
+        {!mark && (
+          <circle
+            cx="100"
+            cy="100"
+            r="63"
+            strokeWidth="0.75"
+            opacity="0.5"
+            style={coreStyle}
+          />
+        )}
       </g>
 
+      {!mark && (
       <g fill="currentColor" stroke="none" data-crest-text style={hidden}>
         <text fontSize="11" letterSpacing="3.2" fontFamily="var(--font-mono), monospace">
           <textPath href={`#${uid}-t`} startOffset="50%" textAnchor="middle">
@@ -102,30 +112,40 @@ export default function Crest({
           </textPath>
         </text>
       </g>
+      )}
 
       {/* jedrenjak — tri jarbola karake svedena na tri trokuta.
           Bez središnjeg natpisa spusti se da ostane optički u sredini. */}
       <g
         stroke="currentColor"
-        strokeWidth="1.5"
         strokeLinejoin="round"
         data-crest-sail
-        transform={center ? undefined : 'translate(0 14)'}
+        strokeWidth={w(1.5)}
+        // u mark načinu jedrenjak se poveća oko vlastitog središta (~100,86) da
+        // ispuni prsten — inače na 44 px pluta kao mrvica usred kruga
+        transform={
+          mark
+            ? 'translate(100 86) scale(1.45) translate(-100 -86)'
+            : center
+              ? undefined
+              : 'translate(0 14)'
+        }
         style={coreStyle}
       >
-        <path d="M100 48 L100 106" strokeWidth="1.1" opacity="0.55" />
-        <path d="M76 58 L76 102" strokeWidth="0.9" opacity="0.38" />
-        <path d="M124 58 L124 102" strokeWidth="0.9" opacity="0.38" />
+        <path d="M100 48 L100 106" strokeWidth={w(1.1)} opacity="0.55" />
+        {!mark && <path d="M76 58 L76 102" strokeWidth="0.9" opacity="0.38" />}
+        {!mark && <path d="M124 58 L124 102" strokeWidth="0.9" opacity="0.38" />}
         <path d="M100 50 L115 96 L100 96 Z" />
-        <path d="M100 50 L85 96 L100 96 Z" opacity="0.5" />
-        <path d="M76 62 L86 98 L76 98 Z" opacity="0.36" />
-        <path d="M124 62 L114 98 L124 98 Z" opacity="0.36" />
+        <path d="M100 50 L85 96 L100 96 Z" opacity={mark ? 0.75 : 0.5} />
+        {!mark && <path d="M76 62 L86 98 L76 98 Z" opacity="0.36" />}
+        {!mark && <path d="M124 62 L114 98 L124 98 Z" opacity="0.36" />}
         {/* trup */}
-        <path d="M70 106 Q100 120 130 106 L126 100 L74 100 Z" strokeWidth="1.4" />
+        <path d="M70 106 Q100 120 130 106 L126 100 L74 100 Z" strokeWidth={w(1.4)} />
         {/* val */}
-        <path d="M68 116 q9 5 18 0 t18 0 t18 0" strokeWidth="0.9" opacity="0.45" />
+        {!mark && <path d="M68 116 q9 5 18 0 t18 0 t18 0" strokeWidth="0.9" opacity="0.45" />}
       </g>
 
+      {!mark && (
       <g
         fill="currentColor"
         stroke="none"
@@ -155,6 +175,7 @@ export default function Crest({
           </text>
         )}
       </g>
+      )}
     </svg>
   );
 }

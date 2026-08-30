@@ -240,6 +240,14 @@ body {
   transform: none !important;
 }
 
+/* Mobile-first: sitni tekstualni linkovi moraju imati metu od 44 px iako je
+   sam tekst visok 11. Vidljivi tekst se ne mijenja, samo meta oko njega. */
+.tap {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
 /* ---------------------------------------------------------- utility ---- */
 
 .shell {

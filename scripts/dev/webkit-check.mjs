@@ -50,7 +50,10 @@ const report = await page.evaluate(() => {
     invisible,
     bg: getComputedStyle(document.documentElement).getPropertyValue('--bg').trim(),
     fg: getComputedStyle(document.documentElement).getPropertyValue('--fg').trim(),
-    stickyBar: getComputedStyle(document.getElementById('sticky-cta')).transform,
+    floatingCta: (() => {
+      const el = document.querySelector('a[aria-label*="Get directions"]');
+      return el ? getComputedStyle(el).opacity : 'nema';
+    })(),
   };
 });
 
@@ -59,13 +62,11 @@ await page.evaluate(() => window.scrollTo(0, 0));
 await page.waitForTimeout(1400);
 const hero = await page.evaluate(() => {
   const h1 = document.querySelector('h1');
-  const span = h1.querySelector('.reveal-line > span');
-  const fig = document.querySelector('[data-hero-frame]');
+  const span = h1.querySelector('.hero-line > span');
   return {
     h1Transform: getComputedStyle(span).transform,
     h1Opacity: getComputedStyle(h1).opacity,
-    figClip: getComputedStyle(fig).clipPath,
-    figMask: getComputedStyle(fig).webkitMaskImage?.slice(0, 60),
+    heroImgs: document.querySelectorAll('#top img').length,
   };
 });
 

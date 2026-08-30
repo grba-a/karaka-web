@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { nav, venue } from '@/content/site';
 import Cta from './ui/Cta';
+import Logo from './ui/Logo';
 
 /**
  * Traka. Preko heroja je providna (hero ima tamni scrim pa je tekst svijetao),
@@ -49,16 +50,19 @@ export default function Nav() {
             stuck ? 'py-3' : 'py-5'
           }`}
         >
-          <a href="#top" className="display-sub text-[1.375rem] leading-none tracking-tight">
-            Karaka
-          </a>
+          <Logo size={44} compact className="text-[var(--color-brass-lit)]" />
 
           <nav className="hidden items-center gap-8 md:flex" aria-label="Sections">
             {nav.map((item) => (
               <a
                 key={item.id}
                 href={`#${item.id}`}
-                className="label opacity-70 transition-opacity duration-300 hover:opacity-100"
+                className="tap label transition-opacity duration-300 hover:opacity-100"
+                style={
+                  stuck
+                    ? { opacity: 0.7 }
+                    : { opacity: 0.95, textShadow: '0 1px 10px rgba(10,7,5,.6)' }
+                }
               >
                 {item.label}
               </a>
@@ -76,7 +80,7 @@ export default function Nav() {
               onClick={() => setOpen((v) => !v)}
               aria-expanded={open}
               aria-controls="mobile-menu"
-              className="label -mr-1 flex items-center gap-2 px-1 py-2 md:hidden"
+              className="label -mr-2 flex min-h-11 items-center gap-2 px-2 md:hidden"
             >
               {open ? 'Close' : 'Menu'}
             </button>

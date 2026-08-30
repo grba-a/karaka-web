@@ -21,7 +21,7 @@ export default function Offer() {
   const channels = [...offer.screen.channels, ...offer.screen.channels];
 
   return (
-    <section id="whats-on" ref={root} className="zone-dark relative py-20 md:py-28">
+    <section id="whats-on" ref={root} className="zone-dark relative py-14 md:py-28">
       <div className="shell mx-auto max-w-[1500px]">
         <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-4">
           <h2 data-fade className="display text-[clamp(2.1rem,5vw,3.75rem)]">
@@ -32,7 +32,7 @@ export default function Offer() {
           </p>
         </div>
 
-        <div className="mt-12 grid gap-12 md:mt-16 md:grid-cols-3 md:gap-10">
+        <div className="mt-10 grid gap-12 md:mt-16 md:grid-cols-2 md:gap-16">
           {/* ------------------------------------------------------ na točioniku */}
           <div data-fade>
             <h3 className="label mb-6 opacity-50">{offer.tap.title}</h3>
@@ -81,22 +81,12 @@ export default function Offer() {
 
           </div>
 
-          {/* ---------------------------------------------------------- na stolu */}
-          <div data-fade>
-            <h3 className="label mb-6 opacity-50">{offer.table.title}</h3>
-            <ul>
-              {offer.table.items.map((item) => (
-                <li key={item.name} className="rule-b py-3">
-                  <span className="display-sub block text-[1.125rem]">{item.name}</span>
-                  <span className="mt-0.5 block text-[0.8125rem] opacity-50">{item.note}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-5 text-[0.875rem] leading-relaxed opacity-55">
-              {offer.table.footnote}
-            </p>
-          </div>
         </div>
+
+        {/* Karaka nema kuhinju — bolje to reći nego pustiti gosta da nagađa. */}
+        <p data-fade className="mt-10 text-[0.9375rem] leading-relaxed opacity-55">
+          {offer.kitchen}
+        </p>
 
         {/* CTA ima vlastitu traku preko cijele širine — u stupcu se čitao kao
             sitni link, a ovo je jedina akcija cijele sekcije. */}

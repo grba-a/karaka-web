@@ -13,16 +13,19 @@ import Cta from './ui/Cta';
  * otvoreno, koliko još, i kakav je pub baš u ovom satu. To je ujedno i
  * najjači prodajni argument („otvoreno je, dva si koraka daleko").
  *
- * Fotografija: SSR uvijek renderira dnevnu (najvjerojatniji sat posjeta,
- * `priority` zbog LCP-a). Tek ako je u Dubrovniku mrak, klijent dovuče noćnu
- * i crossfadea. Gost koji dođe danju noćnu fotku nikad ni ne skine.
+ * Fotografija je jedna i nepromjenjiva. Živo ostaje samo REČENICA ispod
+ * naslova — mijenja se kroz pet stanja dana (openState), ali slika ne titra.
  *
  * Cijela uvodna animacija je u CSS-u (globals.css), ne u GSAP-u — hero se
  * mora nacrtati prije nego JS stigne.
  */
 
-const DAY = { src: 'alley-crowd', alt: 'The busy stone lane Između polača beneath the Irish Pub Karaka lantern' };
-const NIGHT = { src: 'board-neon-guests', alt: 'Guests at a table beneath the green neon draught board inside Irish Pub Karaka' };
+/** Jedna jedina hero fotografija: uličica s lampionom „IRISH PUB Karaka".
+ *  Ima znak lokala i usput pokazuje gužvu, što je i društveni dokaz. */
+const HERO_IMG = {
+  src: 'alley-crowd',
+  alt: 'The busy stone lane Između polača beneath the Irish Pub Karaka lantern',
+};
 
 export default function Hero() {
   // SSR i prvi paint idu na neutralno popodne; živo stanje stiže na mountu,
@@ -42,25 +45,14 @@ export default function Hero() {
       {/* ------------------------------------------------------- pozadina */}
       <div className="absolute inset-0 -z-10">
         <Image
-          src={`/img/${DAY.src}.webp`}
-          alt={DAY.alt}
+          src={`/img/${HERO_IMG.src}.webp`}
+          alt={HERO_IMG.alt}
           fill
           priority
           fetchPriority="high"
           sizes="100vw"
           className="hero-img object-cover object-[50%_38%]"
         />
-        {/* noćna varijanta se dovlači tek kad je stvarno mrak u Dubrovniku */}
-        {state.dark && (
-          <Image
-            src={`/img/${NIGHT.src}.webp`}
-            alt={NIGHT.alt}
-            fill
-            sizes="100vw"
-            className="object-cover object-[50%_45%] transition-opacity duration-1000"
-          />
-        )}
-
         {/* Scrim radi dvije stvari: drži kontrast teksta i skriva to što su
             izvori portretni 1066×1600 pa se na širokom ekranu uvećavaju. */}
         <div
@@ -74,7 +66,7 @@ export default function Hero() {
               'linear-gradient(to right, rgba(10,7,5,.72) 0%, rgba(10,7,5,.24) 40%, transparent 62%)',
               // kratki gradijent samo iza trake — bez njega se linkovi gube na
               // osunčanom dijelu zida
-              'linear-gradient(to bottom, rgba(10,7,5,.5) 0%, transparent 15%)',
+              'linear-gradient(to bottom, rgba(10,7,5,.78) 0%, rgba(10,7,5,.42) 9%, transparent 22%)',
             ].join(', '),
           }}
         />
