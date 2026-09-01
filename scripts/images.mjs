@@ -11,6 +11,7 @@
 import sharp from 'sharp';
 import { mkdirSync, existsSync, copyFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
+const ROOT = process.cwd();
 
 const SRC = '/Users/grbaa/Desktop/Karaka slike';
 const OUT = path.join(process.cwd(), 'public', 'img');
@@ -51,12 +52,20 @@ const MAP = {
   30: 'guests-lamp',
 };
 
-const files = readdirSync(SRC)
-  .filter((f) => f.toLowerCase().endsWith('.jpeg'))
-  .sort();
+// Izvorni folder fotki živi samo na jednom Macu (nije u repou, prevelik je).
+// Ako ga nema — npr. na CI-ju ili drugom stroju — svejedno se obradi logo,
+// koji jest u repou (assets/karaka-logo.png).
+const hasPhotoSource = existsSync(SRC);
+const files = hasPhotoSource
+  ? readdirSync(SRC).filter((f) => f.toLowerCase().endsWith('.jpeg')).sort()
+  : [];
 
 mkdirSync(OUT, { recursive: true });
 mkdirSync(VIDEO_OUT, { recursive: true });
+
+if (!hasPhotoSource) {
+  console.warn(`  ⚠ ${SRC} ne postoji na ovom stroju — preskačem fotke, radim samo logo`);
+}
 
 let n = 0;
 for (const [idx, name] of Object.entries(MAP)) {
@@ -79,13 +88,42 @@ for (const [idx, name] of Object.entries(MAP)) {
   n++;
 }
 
+// Pravi logo s table — jedini asset koji NE dolazi iz foldera s fotkama.
+// Skinut je sa starog WordPressa (samo 160×192 px, čeka se vektor od klijenta).
+// Alfa se čuva (lossless) jer badge ima tvrde rubove koje lossy razmaže.
+const LOGO_SRC = path.join(process.cwd(), 'assets', 'karaka-logo.png');
+if (existsSync(LOGO_SRC)) {
+  const trimmed = sharp(LOGO_SRC).trim({ threshold: 8 });
+  await trimmed.clone().webp({ lossless: true, alphaQuality: 100 })
+    .toFile(path.join(OUT, 'karaka-logo.webp'));
+
+  // Kvadratne verzije za favicon/apple-icon: logo je otprilike okrugao u
+  // pravokutniku, pa se centrira na prozirno (favicon) i na tintu (apple-icon,
+  // gdje iOS ionako ne podnosi providnost).
+  const meta = await trimmed.clone().metadata();
+  const side = Math.round(Math.max(meta.width, meta.height) * 1.14);
+  const pad = { width: side, height: side, fit: 'contain' };
+
+  await trimmed.clone().resize({ ...pad, background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .resize(256, 256, { kernel: 'lanczos3' })
+    .png().toFile(path.join(ROOT, 'src', 'app', 'icon.png'));
+
+  await trimmed.clone().resize({ ...pad, background: '#14100D' })
+    .resize(180, 180, { kernel: 'lanczos3' })
+    .png().toFile(path.join(ROOT, 'src', 'app', 'apple-icon.png'));
+
+  console.log(`  ✓ karaka-logo  izvor ${meta.width}×${meta.height} (traži vektor) → webp + icon.png + apple-icon.png`);
+}
+
 // Videa su već H.264/AAC iz WhatsAppa — nema HEVC zamke, samo ih kopiramo.
-const vids = readdirSync(SRC).filter((f) => f.toLowerCase().endsWith('.mp4')).sort();
-['ambience-1', 'ambience-2', 'ambience-3'].forEach((name, i) => {
-  if (!vids[i]) return;
-  const dest = path.join(VIDEO_OUT, `${name}.mp4`);
-  if (!existsSync(dest)) copyFileSync(path.join(SRC, vids[i]), dest);
-  console.log(`  ✓ ${name}.mp4`);
-});
+if (hasPhotoSource) {
+  const vids = readdirSync(SRC).filter((f) => f.toLowerCase().endsWith('.mp4')).sort();
+  ['ambience-1', 'ambience-2', 'ambience-3'].forEach((name, i) => {
+    if (!vids[i]) return;
+    const dest = path.join(VIDEO_OUT, `${name}.mp4`);
+    if (!existsSync(dest)) copyFileSync(path.join(SRC, vids[i]), dest);
+    console.log(`  ✓ ${name}.mp4`);
+  });
+}
 
 console.log(`\n${n} slika → ${OUT}`);

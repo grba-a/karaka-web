@@ -50,7 +50,7 @@ export default function Nav() {
             stuck ? 'py-3' : 'py-5'
           }`}
         >
-          <Logo size={44} compact className="text-[var(--color-brass-lit)]" />
+          <Logo size={44} priority />
 
           <nav className="hidden items-center gap-8 md:flex" aria-label="Sections">
             {nav.map((item) => (

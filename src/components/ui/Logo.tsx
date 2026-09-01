@@ -1,39 +1,43 @@
 'use client';
 
-import Crest from './Crest';
+import Image from 'next/image';
 
 /**
- * Znak stranice — zlatni ugravirani grb, isti u headeru i footeru.
+ * Znak stranice — pravi logo s fizičke table (kružni badge, script „Karaka",
+ * djetelina). Isti u headeru i footeru, favicon i apple-icon su izvedeni iz
+ * njega preko `scripts/images.mjs`.
  *
- * Vektorski je, pa je oštar na svakoj veličini i na svakom DPR-u. Fizička tabla
- * lokala ima drugi, rasterski logo (`assets/karaka-logo.png`, samo 160×192 px);
- * ako klijent pošalje vektorsku verziju tog znaka, mijenja se sadržaj ove
- * komponente i ništa drugo.
+ * OGRANIČENJE: izvor je 160×192 px raster skinut sa starog WordPressa —
+ * jedini koji postoji. Next/Image ga skalira dolje bez gubitka (nikad se ne
+ * traži uvećanje preko izvorne veličine), ali gore od ~90 px visine počinje
+ * omekšavati. Traži se vektor od klijenta; kad stigne, mijenja se samo
+ * datoteka u `assets/` i ponovno se pokrene `npm run images`.
  *
- * U headeru se tekst po kružnici izostavlja — na 38 px se ionako ne čita, a
- * bez njega grb ostaje čist.
+ * Uvijek je link na vrh stranice.
  */
 export default function Logo({
   size = 40,
-  compact = false,
+  priority = false,
   className = '',
 }: {
   size?: number;
-  /** true = bez teksta po kružnici (za male veličine) */
-  compact?: boolean;
+  priority?: boolean;
   className?: string;
 }) {
   return (
     <a
       href="#top"
       aria-label="Irish Pub Karaka — back to top"
-      className={`inline-flex shrink-0 items-center justify-center transition-opacity duration-300 hover:opacity-75 ${className}`}
-      style={{ height: size, width: size }}
+      className={`inline-flex shrink-0 items-center transition-opacity duration-300 hover:opacity-80 ${className}`}
     >
-      <Crest
-        mark={compact}
-        className="h-full w-full"
-        style={{ color: 'currentColor' }}
+      <Image
+        src="/img/karaka-logo.webp"
+        alt="Irish Pub Karaka"
+        width={159}
+        height={190}
+        priority={priority}
+        sizes={`${size * 2}px`}
+        style={{ height: size, width: 'auto' }}
       />
     </a>
   );

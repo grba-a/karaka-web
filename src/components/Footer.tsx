@@ -22,7 +22,7 @@ export default function Footer() {
   return (
     <footer ref={root} className="zone-dark relative pb-10 pt-14 md:pt-16">
       <div className="shell mx-auto flex max-w-[1500px] flex-col items-center gap-8 text-center">
-        <Logo size={72} className="text-[var(--color-brass)]" />
+        <Logo size={72} />
 
         <address data-fade className="flex flex-col gap-1.5 not-italic">
           <span className="display-sub text-[1.125rem]">{venue.street}</span>
